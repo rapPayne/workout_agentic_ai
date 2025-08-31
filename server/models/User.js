@@ -13,7 +13,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     sparse: true
-  }
+  },
+  googleAccessToken: String,
+  googleRefreshToken: String,
+  googleTokenExpires: Date
 });
 
 const User = mongoose.model('User', userSchema);

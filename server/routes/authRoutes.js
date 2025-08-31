@@ -49,7 +49,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Google Auth
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email', 'https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.readonly'], accessType: 'offline', prompt: 'consent' }));
 
 router.get(
   '/google/callback',

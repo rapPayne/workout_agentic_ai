@@ -24,16 +24,24 @@ passport.use(new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: '/auth/google/callback'
+  callbackURL: '/auth/google/callback',
+  scope: ['profile', 'email', 'https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.readonly']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
     if (user) {
+      user.googleAccessToken = accessToken;
+      user.googleRefreshToken = refreshToken || user.googleRefreshToken; // Keep existing if new one isn't provided
+      user.googleTokenExpires = new Date(Date.now() + 3600 * 1000); // 1 hour expiry
+      await user.save();
       return done(null, user);
     } else {
       user = new User({
         username: profile.displayName,
-        googleId: profile.id
+        googleId: profile.id,
+        googleAccessToken: accessToken,
+        googleRefreshToken: refreshToken,
+        googleTokenExpires: new Date(Date.now() + 3600 * 1000) // 1 hour expiry
       });
       await user.save();
       return done(null, user);
